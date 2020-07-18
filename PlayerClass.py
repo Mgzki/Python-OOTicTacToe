@@ -1,6 +1,5 @@
 class Player:
-    def __init__(self, name, symbol, score):
-        self.name = name
+    def __init__(self, symbol, score):
         self.symbol = symbol
         self.score = score
 
@@ -14,4 +13,4 @@ class Player:
         self.score -= 1
 
     def show_score(self):
-        print('Player {}({}): {} points'.format(self.name, self.symbol, self.score))
+        print('Player {}: {} points'.format(self.symbol, self.score))
