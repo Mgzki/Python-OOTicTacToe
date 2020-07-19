@@ -5,10 +5,7 @@ class Player:
 
     def win(self):
         self.score += 1
-
-    def tie(self):
-        self.score += 0
-
+        
     def lose(self):
         self.score -= 1
 
