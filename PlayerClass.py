@@ -12,5 +12,5 @@ class Player:
     def lose(self):
         self.score -= 1
 
-    def show_score(self):
+    def show_Score(self):
         print('Player {}: {} points'.format(self.symbol, self.score))
