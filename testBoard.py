@@ -8,11 +8,14 @@ def check_win(board,player):
     rows = board.rows()
     cols = board.cols()
     diags = board.diags()
+
     for i in range(board.width):
         if in_a_row == rows[i] or in_a_row == cols[i]:
             return True
-        elif in_a_row == diags[0] or in_a_row == diags[1]:
-            return True
+
+    if in_a_row == diags[0] or in_a_row == diags[1]:
+        return True
+
     return False
 
 #checks for empty moves, if one exists it's not a tie
@@ -83,8 +86,68 @@ def move(mode,board,turn):
                 print("Invalid move")
                 move(mode,board,turn)
         else:
-            #AI move handling 
-            pass
+            make_bot_selection(board)
+
+def make_bot_selection(board):
+    best_score = float("-inf")
+    best_move = -1
+
+    for row in range(len(board.play_field)):
+        for column in range(row):
+            if isinstance(board.play_field[row][column], int):
+                old_value = board.play_field[row][column]
+                board.play_field[row][column] = "O"
+                score = minimax(board, 0, True)
+                board.play_field[row][column] = old_value
+
+                if score > best_score:
+                    best_score = score
+                    best_move = old_value
+
+    # print("Best move " + str(best_move))
+    x, y = convert_move(best_move)
+    board.set_Move(x, y, "O")
+    # board.play_field[x][y] = "O"
+    print(board)
+
+def minimax(board, depth, maximizing_player):
+    if check_win(board, "O"):
+        return 1
+
+    if check_win(board, "X"):
+        return -1
+
+    if check_tie(board):
+        return 0
+
+    if maximizing_player:
+        best_score = float("-inf")
+        for row in range(len(board.play_field)):
+            for column in range(row):
+                if isinstance(board.play_field[row][column], int):
+                    old_value = board.play_field[row][column]
+                    board.play_field[row][column] = "O"
+                    print("changed at position: " + str(old_value))
+                    print(board)
+                    score = minimax(board, depth + 1, False)
+                    board.play_field[row][column] = old_value
+
+                    if score > best_score:
+                        best_score = score
+        return best_score
+    else:
+        best_score = float("inf")
+        for row in range(len(board.play_field)):
+            for column in range(row):
+                if isinstance(board.play_field[row][column], int):
+                    old_value = board.play_field[row][column]
+                    board.play_field[row][column] = "X"
+                    score = minimax(board, depth + 1, True)
+                    board.play_field[row][column] = old_value
+
+                    if score < best_score:
+                        best_score = score
+        return best_score
 
 if __name__ == "__main__":
     #initialize the game, players
