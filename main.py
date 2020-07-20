@@ -5,9 +5,7 @@ import random
 #checks if the current player met a win condition
 def check_win(board,player):
     in_a_row = [player]*board.width
-    rows = board.rows()
-    cols = board.cols()
-    diags = board.diags()
+    rows,cols,diags = board.rows(),board.cols(),board.diags()
     for i in range(board.width):
         if in_a_row == rows[i] or in_a_row == cols[i]:
             return True
@@ -19,11 +17,7 @@ def check_win(board,player):
 #used with check_win(board,player) such that if no win condition is met
 #and there are no free moves, it's a tie
 def check_tie(board):
-    for i in board.rows():
-        for col in i:
-            if isinstance(col,int):
-                return False
-    return True
+    return board.full_Board()
 
 #determines who goes first
 def first():
@@ -32,7 +26,7 @@ def first():
     print(turn + " Goes first")
     return turn
 
-#initializes an empty board, and 2 players
+#initializes an empty 3x3 board, and 2 players('X','O')
 def setup():
     board = Board(3,3)
     board.create_Board()
@@ -74,7 +68,9 @@ def move(mode,board,turn):
         else:
             print("Invalid move")
             move(mode,board,turn)
+    #Human vs AI move handling
     else:
+        #Human move handling
         if turn == 'X':
             x,y = convert_move(int(input(turn + " Enter your move (1-9):\n")))
             if board.set_Move(x,y,turn):
@@ -82,9 +78,58 @@ def move(mode,board,turn):
             else:
                 print("Invalid move")
                 move(mode,board,turn)
+        #AI move handling
         else:
-            #AI move handling 
-            pass
+            print(turn + " is deciding")
+            bot_move(board,turn)
+            print(board)
+
+#Determines best possible move for the AI
+#The worst outcome it will allow for is a tie
+def bot_move(board,turn):
+    bestScore = float("-inf")
+    for i in range(9):
+        x,y = convert_move(i+1)
+        #Attempts the move and passes in the next turn as the human player
+        if board.set_Move(x,y,turn):
+            score = minimax(board, 0, 'X')
+            board.play_field[x][y] = i+1
+            if score > bestScore:
+                bestScore = score
+                bot_x, bot_y = (x,y)
+    board.set_Move(bot_x, bot_y, turn)
+        
+#AI ('O') is maximizing player | human ('X') is minimizing player
+#Minimax tries every possible final state of the board to determine its best move
+#assumes the human is trying to maximize it's score
+def minimax(board, depth, turn):
+    p_inf = float("inf")
+    n_inf = float("-inf")
+    if check_win(board,'O'): return 1
+    if check_win(board,'X'): return -1
+    if check_tie(board): return 0
+    #Maximizing turn
+    if turn == 'O':
+        bestScore = n_inf
+        for i in range(9):
+            x,y = convert_move(i+1)
+            if board.set_Move(x,y,'O'):
+                score = minimax(board, depth+1, 'X')
+                board.play_field[x][y] = i+1
+                if score > bestScore:
+                    bestScore = score
+        return bestScore
+    #Minimizing turn
+    else:
+        bestScore = p_inf
+        for i in range(9):
+            x,y = convert_move(i+1)
+            if board.set_Move(x,y,'X'):
+                score = minimax(board, depth+1, 'O')
+                board.play_field[x][y] = i+1
+                if score < bestScore:
+                    bestScore = score
+        return bestScore
 
 if __name__ == "__main__":
     #initialize the game, players
